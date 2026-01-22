@@ -1,19 +1,19 @@
 pipeline {
-    agent any{
-        stages {
-            stage('Build Docker Image') {
-                steps {
-                    dir('projeccc-02-jenkins-pipeline'){
-                        sh 'docker build -t jenkins-pipeline-app'
-                    }
+    agent any
+
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                dir('project-02-jenkins-pipeline') {
+                    sh 'docker build -t jenkins-pipeline-app .'
+                }
             }
-                }
-            stage('Run Docker Container'){
-                steps{
-                    sh 'docker run --rm jenkins-pipeline-app'
-                }
-            }    
-               
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                sh 'docker run --rm jenkins-pipeline-app'
             }
         }
     }
+}
