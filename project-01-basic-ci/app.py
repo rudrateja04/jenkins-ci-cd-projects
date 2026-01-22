@@ -1,1 +1,1 @@
-print("Hello from Jenkins CI using Docker:v1")
+print("Hello from Jenkins CI using Docker:v2")
