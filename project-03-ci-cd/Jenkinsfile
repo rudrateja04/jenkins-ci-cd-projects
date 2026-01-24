@@ -1,39 +1,50 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "rudrateja04/jenkins-cicd-app"
+        CONTAINER_NAME = "jenkins-cicd-app"
+    }
+
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Image') {
             steps {
                 dir('project-03-ci-cd') {
-                    sh 'docker build -t rudrateja04/jenkins-cicd-app:latest .'
+                    sh 'docker build -t $IMAGE_NAME:latest .'
                 }
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Push Image') {
             steps {
-                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASS')]) {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
                     sh '''
-                      echo $DOCKER_PASS | docker login -u rudrateja04 --password-stdin
-                      docker push rudrateja04/jenkins-cicd-app:latest
+                      echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                      docker push $IMAGE_NAME:latest
                     '''
                 }
             }
         }
 
-        stage('Deploy Application') {
+        stage('Deploy') {
             steps {
                 sh '''
-                  docker stop cicd-app || true
-                  docker rm cicd-app || true
-                  docker run -d -p 5000:5000 --name cicd-app rudrateja04/jenkins-cicd-app:latest
+                  docker stop $CONTAINER_NAME || true
+                  docker rm $CONTAINER_NAME || true
+                  docker run -d --name $CONTAINER_NAME -p 5000:5000 $IMAGE_NAME:latest
                 '''
             }
         }
